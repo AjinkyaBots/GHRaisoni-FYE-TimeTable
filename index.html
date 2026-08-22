@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>First Year Engineering TimeTable | GH Raisoni Jalgaon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --yellow:#FFC633;
+    --yellow-deep:#F2A900;
+    --ink:#181818;
+    --ink-soft:#555;
+    --paper:#FFFFFF;
+    --cream:#FFF6DD;
+    --border:#e6e6e6;
+    --radius:12px;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  html,body{ margin:0; padding:0; width:100%; overflow-x:hidden; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  img,svg{ max-width:100%; }
+
+  header.top{
+    background:var(--ink);
+    color:var(--yellow);
+    padding:24px 16px 22px;
+    text-align:center;
+  }
+  header.top h1{
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(20px,5.5vw,28px);
+    font-weight:700;
+    margin:0 0 6px;
+    line-height:1.25;
+  }
+  header.top .sub{
+    color:#fff;
+    opacity:0.7;
+    font-size:12.5px;
+    font-weight:500;
+  }
+
+  main{
+    max-width:600px;
+    margin:0 auto;
+    padding:16px;
+    width:100%;
+  }
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    padding:18px 16px;
+    margin-bottom:16px;
+  }
+
+  .field{ margin-bottom:14px; }
+  .field:last-of-type{ margin-bottom:0; }
+  .field label{
+    display:block;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:7px;
+    color:var(--ink-soft);
+  }
+  select{
+    width:100%;
+    max-width:100%;
+    padding:12px 36px 12px 13px;
+    font-size:14.5px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    border:1.5px solid #d8d8d8;
+    border-radius:10px;
+    background:#fafafa url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%23181818' stroke-width='2' fill='none'/></svg>") no-repeat right 14px center;
+    appearance:none;
+    -webkit-appearance:none;
+    color:var(--ink);
+  }
+  select:disabled{ background-color:#f2f2f2; color:#999; }
+  select:focus-visible, button:focus-visible{ outline:2px solid var(--yellow-deep); outline-offset:2px; }
+
+  .day-row{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:6px;
+  }
+  .day-btn{
+    min-width:0;
+    padding:9px 2px;
+    border:1.5px solid #d8d8d8;
+    border-radius:8px;
+    background:#fafafa;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .day-btn.active{
+    background:var(--ink);
+    color:var(--yellow);
+    border-color:var(--ink);
+  }
+
+  .submit-btn{
+    width:100%;
+    margin-top:16px;
+    padding:13px;
+    background:var(--yellow);
+    color:var(--ink);
+    border:none;
+    border-radius:10px;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .submit-btn:active{ background:var(--yellow-deep); }
+
+  .hint{
+    text-align:center;
+    color:#999;
+    font-size:12.5px;
+    padding:4px 10px 0;
+  }
+
+  /* ---------- Result ---------- */
+  #result{ display:none; }
+  #result.show{ display:block; animation:fadeUp .3s ease; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .result-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .result-head h2{
+    font-family:'Poppins',sans-serif;
+    font-size:16.5px;
+    margin:0;
+    min-width:0;
+  }
+  .result-head .tag{
+    background:var(--cream);
+    color:var(--ink);
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  /* ---------- Period list (works on every screen size) ---------- */
+  .period{
+    display:flex;
+    gap:12px;
+    padding:12px 4px;
+    border-bottom:1px solid var(--border);
+  }
+  .period:last-child{ border-bottom:none; }
+  .period .ptime{
+    flex:0 0 64px;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    line-height:1.3;
+    color:var(--ink-soft);
+    padding-top:2px;
+  }
+  .period .pbody{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .class-row{
+    margin-bottom:8px;
+  }
+  .class-row:last-child{ margin-bottom:0; }
+  .class-row .subject{
+    font-weight:700;
+    font-size:14px;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+  }
+  .class-row .subcode{
+    font-size:11px;
+    color:#aaa;
+    font-weight:600;
+    margin-left:5px;
+  }
+  .class-row .meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 12px;
+    margin-top:3px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .class-row .meta span{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    word-break:break-word;
+  }
+  .batch-tag{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--yellow);
+    font-size:10px;
+    font-weight:700;
+    padding:1px 7px;
+    border-radius:8px;
+    margin-bottom:3px;
+  }
+
+  .period.free .pbody{ color:#c2c2c2; font-size:13px; font-style:italic; padding-top:2px; }
+  .period.special{
+    background:var(--yellow);
+    border-radius:10px;
+    margin:2px 0;
+    align-items:center;
+  }
+  .period.special.library{ background:var(--cream); }
+  .period.special .pbody{
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+  }
+
+  /* ---------- Popup ---------- */
+  .popup{
+    position:fixed;
+    right:14px;
+    bottom:14px;
+    width:min(270px, calc(100vw - 28px));
+    background:var(--ink);
+    color:#fff;
+    border-radius:16px;
+    padding:14px 14px 12px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    z-index:999;
+    transform:translateX(140%);
+    opacity:0;
+    transition:transform .55s cubic-bezier(.2,.8,.2,1), opacity .55s ease;
+  }
+  .popup.show{ transform:translateX(0); opacity:1; }
+  .popup.hidden{ display:none; }
+  .popup .close{
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:22px;height:22px;
+    background:transparent;
+    color:#aaa;
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:15px;
+    line-height:1;
+  }
+  .popup .close:hover{ color:#fff; }
+  .popup h3{
+    margin:0 18px 4px 0;
+    font-family:'Poppins',sans-serif;
+    font-size:14px;
+    color:var(--yellow);
+  }
+  .popup p{
+    margin:0 0 10px;
+    font-size:12px;
+    color:#dcdcdc;
+    line-height:1.45;
+  }
+  .wa-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    background:#25D366;
+    color:#08210f;
+    font-weight:700;
+    font-size:12.5px;
+    padding:9px 10px;
+    border-radius:9px;
+    text-decoration:none;
+    margin-bottom:8px;
+  }
+  .popup .socials{ display:flex; gap:8px; }
+  .popup .socials a{
+    flex:1;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding:7px 4px;
+    border-radius:8px;
+    background:#262626;
+    color:#fff;
+    font-size:11px;
+    text-decoration:none;
+    font-weight:600;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    text-align:center;
+    padding:22px 16px 30px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  footer .credit{ font-weight:600; margin-bottom:10px; font-family:'Poppins',sans-serif; }
+  footer .credit b{ color:var(--yellow-deep); }
+  footer .ficons{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  footer .ficons a{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:1.5px solid var(--ink);
+    padding:6px 12px;
+    border-radius:20px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:12px;
+    font-weight:600;
+  }
+  footer .ficons svg{ width:14px;height:14px; flex:0 0 auto; }
+
+  @media (max-width:380px){
+    .period{ gap:8px; }
+    .period .ptime{ flex-basis:52px; font-size:11px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>First Year Engineering<br>TimeTable</h1>
+  <div class="sub">G H Raisoni College of Engineering &amp; Management, Jalgaon</div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="field">
+      <label for="branchSel">Branch</label>
+      <select id="branchSel"></select>
+    </div>
+    <div class="field">
+      <label for="clusterSel">Cluster</label>
+      <select id="clusterSel"></select>
+    </div>
+    <div class="field">
+      <label>Day</label>
+      <div class="day-row" id="dayRow"></div>
+    </div>
+    <button class="submit-btn" id="submitBtn">Show TimeTable</button>
+  </div>
+
+  <div class="hint" id="hintText">Pick your branch, cluster &amp; day, then tap Show TimeTable.</div>
+
+  <div id="result">
+    <div class="result-head">
+      <h2 id="resTitle">Timetable</h2>
+      <span class="tag" id="resTag"></span>
+    </div>
+    <div class="card" id="ttList" style="padding:6px 12px;"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="credit">Created with ❤️ by <b>Coder Ajinkya</b></div>
+  <div class="ficons">
+    <a href="https://instagram.com/ajinkya.s99" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      @ajinkya.s99
+    </a>
+    <a href="https://wa.me/919272489837" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8.9-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.4-1.6-.1-.2 0-.4.1-.5.1-.1.3-.3.4-.5.1-.1.2-.3.1-.5-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.8c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+      WhatsApp
+    </a>
+  </div>
+</footer>
+
+<div class="popup hidden" id="joinPopup">
+  <button class="close" id="popupClose" aria-label="Close">✕</button>
+  <h3>🎓 GH Raisoni Chit-Chat</h3>
+  <p>Join the 1st Year friends group — daily updates, notes &amp; timetable reminders!</p>
+  <a class="wa-btn" href="https://chat.whatsapp.com/GVIhWZwS6R1IMEZmc25exO" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8.9-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.4-1.6-.1-.2 0-.4.1-.5.1-.1.3-.3.4-.5.1-.1.2-.3.1-.5-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.8c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+    Join WhatsApp Group
+  </a>
+  <div class="socials">
+    <a href="https://instagram.com/ajinkya.s99" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>
+      Instagram
+    </a>
+    <a href="https://wa.me/919272489837" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg>
+      Ajinkya
+    </a>
+  </div>
+</div>
+
+<script>
+/* ===================== DATA ===================== */
+const TT_DATA = {"periods":["09:45 TO 10:45","10:45 TO 11:45","11:45 TO 12:45","12:45-01:30","01:30-02:30","02:30-03:30","03:30-04:30","04:30-05:30"],"days":{"MONDAY":{"A":[[],["BEE/I/EE1/C-301"],["MDC/I/DRN/C-301"],["LUNCH TIME"],["EC/I/UT/-A1/CHY LAB","BEE/I/EE1/-A2/C-DC MACHINE LAB","DLD/I/PR/-A3/C-303 LAB"],["EC/I/UT/-A1/CHY LAB","BEE/I/EE1/-A2/C-DC MACHINE LAB","DLD/I/PR/-A3/C-303 LAB"],[],[]],"B":[["BEE/I/EE1/C-302"],["EC/I/UT/C-302"],["CS/I/ARP/C-302"],["LUNCH TIME"],["LIBRARY"],["MDC/I/ANS/C-303"],["EC/I/UT/-B1/CHY LAB","EASP/I/EE2/-B2/DC MACHINE LAB","BE/I/TVR-B3/A-316 LAB"],["EC/I/UT/-B1/CHY LAB","EASP/I/EE2/-B2/DC MACHINE LAB","BE/I/TVR-B3/A-316 LAB"]],"C":[["MDC/I/SPS/C-304"],["EM/I/CE2/-C1/WP","EC/I/RDP/-C2/CHY LAB","SPV/I/MP/-C3/ME-CAD LAB"],["EM/I/CE2/-C1/WP","EC/I/RDP/-C2/CHY LAB","SPV/I/MP/-C3/ME-CAD LAB"],["LUNCH TIME"],[],[],[],[]],"D":[[],["MDC/I/AK/C-304"],["EM/I/CG/C-304"],["LUNCH TIME"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],["CAD/I/SNP/-D1/CE-CAD LAB","CS/I/MS/-D2/C-COM LAB","EM/I/CG/-D3/WP"],["CAD/I/SNP/-D1/CE-CAD LAB","CS/I/MS/-D2/C-COM LAB","EM/I/CG/-D3/WP"]],"E":[["DLD/I/RW/C-301"],["LIBRARY"],["MDC/I/AK/C-402"],["LUNCH TIME"],["EC/I/SK/-E1/CHY LAB","BEE/I/EE2/-E2/A-214(A) LAB","CS/I/ARP/-E3/C-PROG. LAB"],["EC/I/SK/-E1/CHY LAB","BEE/I/EE2/-E2/A-214(A) LAB","CS/I/ARP/-E3/C-PROG. LAB"],[],[]],"F":[["BEE/I/EE2/C-305"],["EC/I/SK/-F1/CHY LAB","BEE/I/EE2/-F2/C-DC MACHINE LAB","DLD/I/RW/-F3/A-214(B) LAB"],["EC/I/SK/-F1/CHY LAB","BEE/I/EE2/-F2/C-DC MACHINE LAB","DLD/I/RW/-F3/A-214(B) LAB"],["LUNCH TIME"],["CP/I/SBD/C-303"],["LIBRARY"],["DLD/I/RW/-F1/A-303 LAB","CP/I/SBD/-F2/C-IT LAB","CS/I/ARP/-F3/C-PROG. LAB"],["DLD/I/RW/-F1/A-303 LAB","CP/I/SBD/-F2/C-IT LAB","CS/I/ARP/-F3/C-PROG. LAB"]],"G":[[],["CS/I/MS/-G1/C-PROG.LAB","CP/I/SBD/-G2/C-COM LAB","DLD/I/PR/-G3/A-303 LAB"],["CS/I/MS/-G1/C-PROG.LAB","CP/I/SBD/-G2/C-COM LAB","DLD/I/PR/-G3/A-303 LAB"],["LUNCH TIME"],["MDC/I/ANS/C-304"],[],[],[]],"H":[[],["ICDE/I/SPS/C-305"],["PPS/I/SC/C-305"],["LUNCH TIME"],["EP/I/SW/-H1/PHY LAB","PPS/I/SC/-H2/C-IT LAB","CFT/I/TVR/-H3/A-IDEA LAB"],["EP/I/SW/-H1/PHY LAB","PPS/I/SC/-H2/C-IT LAB","CFT/I/TVR/-H3/A-IDEA LAB"],[],[]],"I":[["PPS/I/SC/C-303"],["LAS/I/ANS/C-303"],["ICDE/I/SPS/C-303"],["LUNCH TIME"],[],[],[],[]],"J":[["ICDE/I/DRN/C-401"],["EP/I/RI/-J1/PHY LAB","PPS/I/SH/-J2/C-IT LAB","CFT/I/ETC2/-J3/A-IDEA LAB"],["EP/I/RI/-J1/PHY LAB","PPS/I/SH/-J2/C-IT LAB","CFT/I/ETC2/-J3/A-IDEA LAB"],["LUNCH TIME"],["PPS/I/SH/-J1/C-COM LAB","FDA/I/ME1/-J2/C-IT LAB","EP/I/RI/-J3/PHY LAB"],["PPS/I/SH/-J1/C-COM LAB","FDA/I/ME1/-J2/C-IT LAB","EP/I/RI/-J3/PHY LAB"],[],[]],"K":[["IKS/I/RI/C-402"],["ICDE/I/DRN/C-402"],["LIBRARY"],["LUNCH TIME"],["FDA/I/CE2/C-302"],["CFT/I/ETC2/C-302"],["CFT/I/ETC2/-K1/A-IDEA LAB","EP/I/SB/-K2/PHY LAB","FDA/I/CE2/-K3/IT LAB"],["CFT/I/ETC2/-K1/A-IDEA LAB","EP/I/SB/-K2/PHY LAB","FDA/I/CE2/-K3/IT LAB"]],"L":[["FDA/I/ME1/C-403"],["EP/I/SB/-L1/PHY LAB","PPS/I/SVC/-L2/C-COM LAB","CFT/I/ETC3/-L3/"],["EP/I/SB/-L1/PHY LAB","PPS/I/SVC/-L2/C-COM LAB","CFT/I/ETC3/-L3/"],["LUNCH TIME"],["IKS/I/SB/C-401"],[],[],[]],"M":[[],["FDA/I/CE1/C-401"],["ICDE/I/ANS/C-401"],["LUNCH TIME"],["LAS/I/DRN/C-301"],["IKS/I/AK/C-301"],[],[]],"N":[["PPS/I/SVC/C-404"],["EP/I/SW/C-404"],["FDA/I/ME1/C-404"],["LUNCH TIME"],["ICDE/I/AK/C-305"],[],[],[]]},"TUESDAY":{"A":[[],["DLD/I/PR/C-402"],["BEE/I/EE1/C-402"],["LUNCH TIME"],["LIBRARY"],["MDC/I/DRN/C-305"],["BEE/I/EE1/-A1/A-214(A) LAB","DLD/I/PR/-A2/A-303 LAB","EC/I/UT/-A3/CHY LAB"],["BEE/I/EE1/-A1/A-214(A) LAB","DLD/I/PR/-A2/A-303 LAB","EC/I/UT/-A3/CHY LAB"]],"B":[["BE/I/TVR/C-302"],["BEE/I/EE1/C-302"],["MDC/I/ANS/C-302"],["LUNCH TIME"],["CS/I/ARP/-B1/C-PROG. LAB","BE/I/TVR-B2/A-IDEA LAB","EC/I/UT/-B3/CHY LAB"],["CS/I/ARP/-B1/C-PROG. LAB","BE/I/TVR-B2/A-IDEA LAB","EC/I/UT/-B3/CHY LAB"],[],[]],"C":[[],["EM/I/CE2/C-403"],["MDC/I/SPS/C-403"],["LUNCH TIME"],["CS/I/MS/C-301"],["EC/I/RDP/C-301"],["SPV/I/MP/-C1/ME-CAD LAB","CS/I/MS/-C2/C-PROG. LAB","EC/I/RDP/-C3/CHY LAB"],["SPV/I/MP/-C1/ME-CAD LAB","CS/I/MS/-C2/C-PROG. LAB","EC/I/RDP/-C3/CHY LAB"]],"D":[["MDC/I/AK/C-303"],["EG/I/JNW/C-303"],["CS/I/MS/C-303"],["LUNCH TIME"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],[],[]],"E":[["DLD/I/RW/-E1/A-303 LAB","EC/I/SK/-E2/CHY LAB","CP/I/SBD/-E3/C-COM LAB"],["DLD/I/RW/-E1/A-303 LAB","EC/I/SK/-E2/CHY LAB","CP/I/SBD/-E3/C-COM LAB"],["DLD/I/RW/C-401"],["LUNCH TIME"],["BEE/I/EE2/C-304"],["MDC/I/AK/C-304"],[],[]],"F":[["CS/I/ARP/C-301"],["CS/I/ARP/-F1/C-PROG. LAB","EC/I/RDP/-F2/CHY LAB","BEE/I/EE2/-F3/DC MACHINE LAB"],["CS/I/ARP/-F1/C-PROG. LAB","EC/I/RDP/-F2/CHY LAB","BEE/I/EE2/-F3/DC MACHINE LAB"],["LUNCH TIME"],["LIBRARY"],["MDC/I/ANS/C-303"],[],[]],"G":[["CS/I/MS/C-304"],["MDC/I/ANS/C-304"],["CP/I/SBD/C-304"],["LUNCH TIME"],["EC/I/SK/-G1/CHY LAB","DLD/I/PR/-G2/A-303 LAB","BEE/I/EE1/-G3/DC MACHINE LAB"],["EC/I/SK/-G1/CHY LAB","DLD/I/PR/-G2/A-303 LAB","BEE/I/EE1/-G3/DC MACHINE LAB"],[],[]],"H":[[],["LAS/I/DRN/C-301"],["PPS/I/SC/C-301"],["LUNCH TIME"],["FDA/I/CE1/C-303"],[],[],[]],"I":[["FDA/I/CE1/C-305"],["LIBRARY"],["EP/I/SW/C-404"],["LUNCH TIME"],["ICDE/I/SPS/C-302"],["PPS/I/SC/C-302"],["EP/I/SW/-I1/PHY LAB","PPS/I/SC/-I2/C-COM LAB","CFT/I/ETC2/-I3/A-IDEA LAB"],["EP/I/SW/-I1/PHY LAB","PPS/I/SC/-I2/C-COM LAB","CFT/I/ETC2/-I3/A-IDEA LAB"]],"J":[[],["CFT/I/ETC2/C-305"],["PPS/I/SH/C-305"],["LUNCH TIME"],["EP/I/RI/C-305"],[],[],[]],"K":[["ICDE/I/DRN/C-401"],["PPS/I/SH/C-401"],["SPORTS"],["LUNCH TIME"],["FDA/I/CE2/-K1/C-COM LAB","CFT/I/ETC2/-K2/A-214(B) LAB","PPS/I/SH/-K3/C-IT LAB"],["FDA/I/CE2/-K1/C-COM LAB","CFT/I/ETC2/-K2/A-214(B) LAB","PPS/I/SH/-K3/C-IT LAB"],[],[]],"L":[["PPS/I/SC/C-402"],["CFT/I/ETC3/-L1/A-IDEA LAB","EP/I/SB/-L2/PHY LAB","FDA/I/ME1/-L3/C-IT LAB"],["CFT/I/ETC3/-L1/A-IDEA LAB","EP/I/SB/-L2/PHY LAB","FDA/I/ME1/-L3/C-IT LAB"],["LUNCH TIME"],["ICDE/I/DRN/C-401"],["LAS/I/SPS/C-401"],["FDA/I/ME1/-L1/C-COMLAB","CFT/I/ETC3/-L2/A-214(B) LAB","PPS/I/SH/-L3/C-IT LAB"],["FDA/I/ME1/-L1/C-COMLAB","CFT/I/ETC3/-L2/A-214(B) LAB","PPS/I/SH/-L3/C-IT LAB"]],"M":[["PPS/I/SVC/C-403"],["PPS/I/SVC/-M1/C-IT LAB","FDA/I/CE1/-M2/C-COM LAB","EP/I/RI/-M3/PHY LAB"],["PPS/I/SVC/-M1/C-IT LAB","FDA/I/CE1/-M2/C-COM LAB","EP/I/RI/-M3/PHY LAB"],["LUNCH TIME"],[],[],[],[]],"N":[["IKS/I/SW/C-404"],["ICDE/I/AK/C-404"],["LIBRARY"],["LUNCH TIME"],["EP/I/SW/-N1/PHY LAB","PPS/I/SVC/-N2/C-COM LAB","CFT/I/ETC3/-N3/"],["EP/I/SW/-N1/PHY LAB","PPS/I/SVC/-N2/C-COM LAB","CFT/I/ETC3/-N3/"],[],[]]},"WEDNESDAY":{"A":[["CS/I/ARP/C-302"],["DLD/I/PR/C-302"],["M&S/I/TVR/C-302"],["LUNCH TIME"],["MDC/I/DRN/C-301"],["EC/I/UT/C-301"],["M&S/I/PR/-A1/A-214(B) LAB","CS/I/ARP/-A2/C-PROG. LAB","BEE/I/EE1/-A3/DC MACHINE LAB"],["M&S/I/PR/-A1/A-214(B) LAB","CS/I/ARP/-A2/C-PROG. LAB","BEE/I/EE1/-A3/DC MACHINE LAB"]],"B":[["MDC/I/ANS/C-402"],["EASP/I/EE2/-B1/","CS/I/ARP/-B2/C-PROG.LAB","BEE/I/EE1/-B3/DC MACHINE LAB"],["EASP/I/EE2/-B1/","CS/I/ARP/-B2/C-PROG.LAB","BEE/I/EE1/-B3/DC MACHINE LAB"],["LUNCH TIME"],[],[],[],[]],"C":[["EC/I/RDP/-C1/CHY LAB","EM/I/CE2/-C2/WP","CS/I/MS/-C3/C-COM LAB"],["EC/I/RDP/-C1/CHY LAB","EM/I/CE2/-C2/WP","CS/I/MS/-C3/C-COM LAB"],["EM/I/CE2/C-401"],["LUNCH TIME"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],["EG/I/JNW/-D1/DH","EG/I/JNW/-D2/DH","EG/I/JNW/-D3/DH"],[],[]],"D":[["EM/I/CG/C-401"],["EG/I/JNW/C-401"],["LIBRARY"],["LUNCH TIME"],["MDC/I/AK/C-303"],["CAD/I/SNP/C-303"],[],[]],"E":[["BEE/I/EE2/C-303"],["MDC/I/AK/C-303"],["CS/I/MS/C-303"],["LUNCH TIME"],["CS/I/ARP/-E1/C-PROG. LAB","CP/I/SBD/-E2/C-COM LAB","EC/I/SK/-E3/CHY LAB"],["CS/I/ARP/-E1/C-PROG. LAB","CP/I/SBD/-E2/C-COM LAB","EC/I/SK/-E3/CHY LAB"],[],[]],"F":[["DLD/I/RW/C-404"],["CP/I/SBD/-F1/C-IT LAB","DLD/I/RW/-F2/A-303 LAB","EC/I/UT/-F3/CHY LAB"],["CP/I/SBD/-F1/C-IT LAB","DLD/I/RW/-F2/A-303 LAB","EC/I/UT/-F3/CHY LAB"],["LUNCH TIME"],["MDC/I/ANS/C-401"],[],[],[]],"G":[["BEE/I/EE1/C-304"],["EC/I/SK/C-304"],["DLD/I/PR/C-304"],["LUNCH TIME"],["DLD/I/PR/-G1/A-303 LAB","BEE/I/EE1/-G2/DC MACHINE LAB","CS/I/MS/-G3/C-IT LAB"],["DLD/I/PR/-G1/A-303 LAB","BEE/I/EE1/-G2/DC MACHINE LAB","CS/I/MS/-G3/C-IT LAB"],[],[]],"H":[["IKS/I/UT/C-305"],["ICDE/I/SPS/C-305"],["PPS/I/SC/C-305"],["LUNCH TIME"],["ICDE/I/SPS/C-302"],["EP/I/SW/C-302"],["FDA/I/CE2/-H1/C-COM LAB","CFT/I/TVR/-H2/A-IDEA LAB","PPS/I/SC/-H3/C-IT LAB"],["FDA/I/CE2/-H1/C-COM LAB","CFT/I/TVR/-H2/A-IDEA LAB","PPS/I/SC/-H3/C-IT LAB"]],"I":[["CFT/I/ETC2/-I1/A-214(B) LAB","EP/I/SW/-I2/PHY LAB","FDA/I/CE1/-I3/C- IT LAB"],["CFT/I/ETC2/-I1/A-214(B) LAB","EP/I/SW/-I2/PHY LAB","FDA/I/CE1/-I3/C- IT LAB"],["LAS/I/ANS/C-403"],["LUNCH TIME"],[],[],[],[]],"J":[[],["PPS/I/SH/C-402"],["LAS/I/AK/C-402"],["LUNCH TIME"],["FDA/I/ME1/C-305"],["ICDE/I/DRN/C-305"],[],[]],"K":[["LAS/I/AK/C-403"],["ICDE/I/DRN/C-403"],["LIBRARY"],["LUNCH TIME"],["EP/I/SB/-K1/PHY LAB","PPS/I/SH/-K2/C-IT LAB","CFT/I/ETC2/-K3/A-214(B) LAB"],["EP/I/SB/-K1/PHY LAB","PPS/I/SH/-K2/C-IT LAB","CFT/I/ETC2/-K3/A-214(B) LAB"],[],[]],"L":[["EP/I/SB/C-301"],["PPS/I/SC/C-301"],["LAS/I/SPS/C-301"],["LUNCH TIME"],[],[],[],[]],"M":[[],["ICDE/I/ANS/C-404"],["LAS/I/DRN/C-404"],["LUNCH TIME"],["CFT/I/ETC3/-M1/A-IDEA LAB","EP/I/RI/-M2/PHY LAB","FDA/I/CE1/-M3/C-COM LAB"],["CFT/I/ETC3/-M1/A-IDEA LAB","EP/I/RI/-M2/PHY LAB","FDA/I/CE1/-M3/C-COM LAB"],["EP/I/RI/-M1/PHY LAB","PPS/I/SVC/-M2/COM LAB","CFT/I/ETC3/-M3/A-214(B) LAB"],["EP/I/RI/-M1/PHY LAB","PPS/I/SVC/-M2/COM LAB","CFT/I/ETC3/-M3/A-214(B) LAB"]],"N":[[],["CFT/I/ETC3/A-IDEA LAB","EP/I/SB/-N2/PHY LAB","FDA/I/ME1/-N3/C-COM LAB"],["CFT/I/ETC3/A-IDEA LAB","EP/I/SB/-N2/PHY LAB","FDA/I/ME1/-N3/C-COM LAB"],["LUNCH TIME"],["PPS/I/SVC/C-304"],["LAS/I/SPS/C-304"],[],[]]},"THURSDAY":{"A":[["CS/I/ARP/-A1/C-PROG. LAB","EC/I/UT/-A2/CHY LAB","M&S/I/TVR/-A3/A-IDEA LAB"],["CS/I/ARP/-A1/C-PROG. LAB","EC/I/UT/-A2/CHY LAB","M&S/I/TVR/-A3/A-IDEA LAB"],["MDC/I/DRN/C-301"],["LUNCH TIME"],["DLD/I/PR/C-401"],[],[],[]],"B":[["MDC/I/ANS/C-302"],["BEE/I/EE1/C-302"],["BE/I/TVR/C-302"],["LUNCH TIME"],["BEE/I/EE1/-B1/DC MACHINE LAB","EC/I/UT/-B2/CHY LAB","EASP/I/EE2/-B3/"],["BEE/I/EE1/-B1/DC MACHINE LAB","EC/I/UT/-B2/CHY LAB","EASP/I/EE2/-B3/"],[],[]],"C":[[],["EG/I/JNW/C-401"],["MDC/I/SPS/C-401"],["LUNCH TIME"],["EG/I/JNW/-C1/DH","EG/I/JNW/-C2/DH","EG/I/JNW/-C3/DH"],["EG/I/JNW/-C1/DH","EG/I/JNW/-C2/DH","EG/I/JNW/-C3/DH"],["CS/I/MS/-C1/C-COM LAB","SPV/I/MP/-C2/ME-CAD LAB","EM/I/CE2/-C3/WP"],["CS/I/MS/-C1/C-COM LAB","SPV/I/MP/-C2/ME-CAD LAB","EM/I/CE2/-C3/WP"]],"D":[["MDC/I/AK/C-401"],["EC/I/RDP/-D1/CHY LAB","EM/I/CG/-D2/WP","CS/I/MS/-D3/C-COM LAB"],["EC/I/RDP/-D1/CHY LAB","EM/I/CG/-D2/WP","CS/I/MS/-D3/C-COM LAB"],["LUNCH TIME"],["EM/I/CG/C-304"],[],[],[]],"E":[["CP/I/SBD/-E1/C-COM LAB","DLD/I/RW/-E2/A-303 LAB","BEE/I/EE2/-E3/DC MACHINE LAB"],["CP/I/SBD/-E1/C-COM LAB","DLD/I/RW/-E2/A-303 LAB","BEE/I/EE2/-E3/DC MACHINE LAB"],["MDC/I/AK/C-402"],["LUNCH TIME"],[],[],[],[]],"F":[[],["EC/I/SK/C-404"],["BEE/I/EE2/C-404"],["LUNCH TIME"],["DLD/I/RW/C-302"],["MDC/I/ANS/C-302"],["BEE/I/EE2/-F1/A-214(A) LAB","CS/I/ARP/-F2/C-PROG. LAB","CP/I/SBD/-F3/C-IT LAB"],["BEE/I/EE2/-F1/A-214(A) LAB","CS/I/ARP/-F2/C-PROG. LAB","CP/I/SBD/-F3/C-IT LAB"]],"G":[["BEE/I/EE1/C-303"],["MDC/I/ANS/C-303"],["DLD/I/PR/C-303"],["LUNCH TIME"],["CP/I/SBD/-G1/C-COM LAB","CS/I/MS/-G2/C-PROG. LAB","EC/I/SK/-G3/CHY LAB"],["CP/I/SBD/-G1/C-COM LAB","CS/I/MS/-G2/C-PROG. LAB","EC/I/SK/-G3/CHY LAB"],[],[]],"H":[["PPS/I/SC/-H1/C-IT LAB","FDA/I/CE1/-H2/CE-CAD LAB","EP/I/SW/-H3/PHY LAB"],["PPS/I/SC/-H1/C-IT LAB","FDA/I/CE1/-H2/CE-CAD LAB","EP/I/SW/-H3/PHY LAB"],["IKS/I/UT/C-403"],["LUNCH TIME"],["LAS/I/DRN/C-301"],["CFT/I/TVR/C-301"],[],[]],"I":[["IKS/I/SK/C-304"],["CFT/I/ETC2/C-304"],["PPS/I/SC/C-304"],["LUNCH TIME"],["PPS/I/SC/-I1/C-IT LAB","FDA/I/CE1/-I2/C-COM LAB","EP/I/SW/-I3/PHY LAB"],["PPS/I/SC/-I1/C-IT LAB","FDA/I/CE1/-I2/C-COM LAB","EP/I/SW/-I3/PHY LAB"],[],[]],"J":[["IKS/I/RDP/C-402"],["PPS/I/SH/C-402"],["LIBRARY"],["LUNCH TIME"],["LAS/I/AK/C-305"],["IKS/I/RDP/C-305"],["CFT/I/ETC2/-J1/A-IDEA LAB","EP/I/RI/-J2/PHY LAB","FDA/I/ME1/-J3/C-COM LAB"],["CFT/I/ETC2/-J1/A-IDEA LAB","EP/I/RI/-J2/PHY LAB","FDA/I/ME1/-J3/C-COM LAB"]],"K":[["PPS/I/SH/C-305"],["LAS/I/AK/C-305"],["EP/I/SB/C-305"],["LUNCH TIME"],[],[],[],[]],"L":[["ICDE/I/DRN/C-301"],["IKS/I/SB/C-301"],["SPORTS"],["LUNCH TIME"],["CFT/I/ETC3/C-402"],[],[],[]],"M":[["CFT/I/ETC3/C-403"],["LAS/I/DRN/C-403"],["LIBRARY"],["LUNCH TIME"],["ICDE/I/ANS/C-303"],["PPS/I/SVC/C-303"],["FDA/I/CE1/-M1/CE-CAD LAB","CFT/I/ETC3/-M2/A-214(B) LAB","PPS/I/SVC/-M3/C-IT LAB"],["FDA/I/CE1/-M1/CE-CAD LAB","CFT/I/ETC3/-M2/A-214(B) LAB","PPS/I/SVC/-M3/C-IT LAB"]],"N":[["LAS/I/SPS/C-404"],["PPS/I/SVC/-N1/C-COM LAB","FDA/I/ME1/-N2/C-IT LAB","EP/I/RI/-N3/PHY LAB"],["PPS/I/SVC/-N1/C-COM LAB","FDA/I/ME1/-N2/C-IT LAB","EP/I/RI/-N3/PHY LAB"],["LUNCH TIME"],[],[],[],[]]},"FRIDAY":{"A":[[],["DLD/I/PR/-A1/A-303 LAB","M&S/I/RW/-A2/A-IDEA LAB","CS/I/ARP/-A3/C-PROG. LAB"],["DLD/I/PR/-A1/A-303 LAB","M&S/I/RW/-A2/A-IDEA LAB","CS/I/ARP/-A3/C-PROG. LAB"],["LUNCH TIME"],["BEE/I/EE1/C-304"],[],[],[]],"B":[[],["EASP/I/EE2/C-402"],["BE/I/TVR/C-402"],["LUNCH TIME"],["BE/I/TVR/-B1/A-303 LAB","BEE/I/EE1/-B2/A-214(A) LAB","CS/I/ARP/-B3/C-PROG. LAB"],["BE/I/TVR/-B1/A-303 LAB","BEE/I/EE1/-B2/A-214(A) LAB","CS/I/ARP/-B3/C-PROG. LAB"],[],[]],"C":[["EG/I/JNW/C-301"],["EM/I/CE2/C-301"],["SPV/I/MP/C-301"],["LUNCH TIME"],["MDC/I/SPS/C-305"],[],[],[]],"D":[["EC/I/RDP/C-402"],["CS/I/MS/-D1/C-COM LAB","EC/I/RDP/-D2/CHY LAB","CAD/I/SNP/-D3/CE-CAD LAB"],["CS/I/MS/-D1/C-COM LAB","EC/I/RDP/-D2/CHY LAB","CAD/I/SNP/-D3/CE-CAD LAB"],["LUNCH TIME"],["EM/I/CG/-D1/WP","CAD/I/SNP/-D2/CE-CAD LAB","EC/I/RDP/-D3/CHY LAB"],["EM/I/CG/-D1/WP","CAD/I/SNP/-D2/CE-CAD LAB","EC/I/RDP/-D3/CHY LAB"],[],[]],"E":[["DLD/I/RW/C-401"],["BEE/I/EE2/C-401"],["LIBRARY"],["LUNCH TIME"],["CP/I/SBD/C-301"],["EC/I/SK/C-301"],["BEE/I/EE2/-E1/A-214(A) LAB","CS/I/MS/-E2/C-PROG. LAB","DLD/I/RW/-E3/A-303 LAB"],["BEE/I/EE2/-E1/A-214(A) LAB","CS/I/MS/-E2/C-PROG. LAB","DLD/I/RW/-E3/A-303 LAB"]],"F":[[],["MDC/I/ANS/C-403"],["BEE/I/EE2/C-403"],["LUNCH TIME"],["DLD/I/RW/C-402"],[],[],[]],"G":[["MDC/I/ANS/C-404"],["BEE/I/EE1/-G1/DC MACHINE LAB","EC/I/SK/-G2/CHY LAB","CP/I/SBD/-G3/C-IT LAB"],["BEE/I/EE1/-G1/DC MACHINE LAB","EC/I/SK/-G2/CHY LAB","CP/I/SBD/-G3/C-IT LAB"],["LUNCH TIME"],["DLD/I/PR/C-303"],["LIBRARY"],["BEE/I/EE1/C-301"],[]],"H":[["CFT/I/TVR/-H1/A-303 LAB","EP/I/SW/-H2/PHY LAB","FDA/I/CE1/-H3/CE-CAD LAB"],["CFT/I/TVR/-H1/A-303 LAB","EP/I/SW/-H2/PHY LAB","FDA/I/CE1/-H3/CE-CAD LAB"],["LAS/I/DRN/C-401"],["LUNCH TIME"],[],[],[],[]],"I":[["IKS/I/SK/C-304"],["ICDE/I/SPS/C-304"],["LAS/I/ANS/C-304"],["LUNCH TIME"],["FDA/I/CE1/-I1/C-COM LAB","CFT/I/ETC2/-I2/A-214(B) LAB","PPS/I/SC/-I3/C-IT LAB"],["FDA/I/CE1/-I1/C-COM LAB","CFT/I/ETC2/-I2/A-214(B) LAB","PPS/I/SC/-I3/C-IT LAB"],[],[]],"J":[["LAS/I/AK/C-403"],["FDA/I/ME1/-J1/C-COM LAB","CFT/I/ETC2/-J2/A-214(B) LAB","PPS/I/SH/-J3/C-IT LAB"],["FDA/I/ME1/-J1/C-COM LAB","CFT/I/ETC2/-J2/A-214(B) LAB","PPS/I/SH/-J3/C-IT LAB"],["LUNCH TIME"],["ICDE/I/DRN/C-401"],[],[],[]],"K":[[],["IKS/I/RI/C-404"],["LAS/I/AK/C-404"],["LUNCH TIME"],["PPS/I/SH/C-403"],["LIBRARY"],["PPS/I/SH/-K1/C-COM LAB","FDA/I/CE2/-K2/C-IT LAB","EP/I/SB/-K3/PHY LAB"],["PPS/I/SH/-K1/C-COM LAB","FDA/I/CE2/-K2/C-IT LAB","EP/I/SB/-K3/PHY LAB"]],"L":[["ICDE/I/DRN/C-305"],["PPS/I/SC/C-305"],["LAS/I/SPS/C-305"],["LUNCH TIME"],["PPS/I/SVC/-L1/C-COM LAB","FDA/I/ME1/-L2/C-IT LAB","EP/I/SB/-L3/PHY LAB"],["PPS/I/SVC/-L1/C-COM LAB","FDA/I/ME1/-L2/C-IT LAB","EP/I/SB/-L3/PHY LAB"],[],[]],"M":[["PPS/I/SVC/C-302"],["IKS/I/AK/C-302"],["EP/I/RI/C-302"],["LUNCH TIME"],[],[],[],[]],"N":[["LAS/I/SPS/C-303"],["CFT/I/ETC3/C-303"],["PPS/I/SVC/C-303"],["LUNCH TIME"],["IKS/I/SW/C-302"],["ICDE/I/AK/C-302"],["FDA/I/ME1/-N1/C-COM LAB","CFT/I/ETC3/-N2/A-IDEA LAB","PPS/I/SVC/-N3/C-IT LAB"],["FDA/I/ME1/-N1/C-COM LAB","CFT/I/ETC3/-N2/A-IDEA LAB","PPS/I/SVC/-N3/C-IT LAB"]]}}};
+
+const SUBJECTS = {
+  MDC:"Matrices and Differential Calculus",
+  EC:"Environmental Chemistry",
+  DLD:"Digital Logic Design",
+  BEE:"Basic Electrical Engineering",
+  BE:"Basic Electronics",
+  EG:"Engineering Graphics",
+  EM:"Engineering Mechanics",
+  SPV:"Solar PV System",
+  CAD:"Computer Aided Drawing",
+  CS:"Communication Skills",
+  CP:"Computer Programming",
+  "M&S":"Modelling and Simulation",
+  EASP:"Energy Audit and Solar Photovoltaic",
+  ICDE:"Integral Calculus and Differential Equations",
+  LAS:"Linear Algebra and Statistics",
+  EP:"Engineering Physics",
+  PPS:"Programming for Problem Solving",
+  CFT:"Computer Fundamentals and Trouble Shooting",
+  FDA:"Fundamentals of Data Analytics",
+  IKS:"Indian Knowledge System"
+};
+
+const FACULTY = {
+  JNW:"Prof. Jitendra N. Wadadkar",
+  DRN:"Dr. Dnyaneshwar R. Nhavi",
+  SPS:"Prof. Suvarna P. Saraf",
+  ANS:"Prof. Aatif N. Shaikh",
+  AK:"Prof. Aabid Khan",
+  ARP:"Prof. Akshay R. Patil",
+  MS:"Prof. Monika Singh",
+  SK:"Dr. Sanjay Kumavat",
+  UT:"Dr. Ujwala Tayade",
+  RDP:"Prof. Ravindra D. Patil",
+  SW:"Prof. Surekha Wani",
+  SB:"Dr. Sanjeev Bhandari",
+  RI:"Dr. Ravi Ingle",
+  RW:"Prof. Ranjit Wagh",
+  PR:"Prof. Pankaj Rangalani",
+  TVR:"Prof. Tripti Verma",
+  SBD:"Prof. Suyash Bonde",
+  SH:"Prof. Sahil Hussain",
+  SC:"Prof. Sayantan Chowdhary",
+  SVC:"Prof. Sujit V. Chaudhari"
+};
+
+const ROOM_LABELS = {
+  "CHY LAB":"Chemistry Lab",
+  "PHY LAB":"Physics Lab",
+  "WP":"Workshop Practice",
+  "DH":"Drawing Hall",
+  "ME-CAD LAB":"Mechanical CAD Lab",
+  "CE-CAD LAB":"Civil CAD Lab",
+  "A-IDEA LAB":"Idea Lab"
+};
+
+const BRANCHES = {
+  ETC:{ name:"Electronics & Telecommunication Engineering", clusters:{A:"ETC"} },
+  EE:{ name:"Electrical Engineering", clusters:{B:"EE"} },
+  ME:{ name:"Mechanical Engineering", clusters:{C:"ME"} },
+  CE:{ name:"Civil Engineering", clusters:{D:"CE"} },
+  AIML:{ name:"Artificial Intelligence & Machine Learning", clusters:{E:"AIML"} },
+  DS:{ name:"Data Science", clusters:{F:"DS"} },
+  IT:{ name:"Information Technology", clusters:{G:"IT"} },
+  CSE:{ name:"Computer Science Engineering", clusters:{H:"CSE - Batch 1 (H)",I:"CSE - Batch 2 (I)",J:"CSE - Batch 3 (J)",K:"CSE - Batch 4 (K)",L:"CSE - Batch 5 (L)"} },
+  AI:{ name:"Artificial Intelligence", clusters:{M:"AI - Batch 1 (M)",N:"AI - Batch 2 (N)"} }
+};
+
+const DAYS = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
+const DAY_LABELS = {MONDAY:"Mon",TUESDAY:"Tue",WEDNESDAY:"Wed",THURSDAY:"Thu",FRIDAY:"Fri"};
+
+const TIME_LABELS = [
+  "09:45\n10:45","10:45\n11:45","11:45\n12:45","12:45\n01:30",
+  "01:30\n02:30","02:30\n03:30","03:30\n04:30","04:30\n05:30"
+];
+
+/* ===================== PARSE ONE ENTRY ===================== */
+function parseEntry(raw){
+  if(raw === "LUNCH TIME") return {type:"lunch"};
+  if(raw === "LIBRARY") return {type:"library"};
+  if(raw === "SPORTS") return {type:"sports"};
+
+  let fixed = raw.replace(/([A-Za-z])(-[A-N]\d)/, "$1/$2");
+  let parts = fixed.split("/").map(p=>p.trim());
+  const subjectCode = parts[0] || "";
+  const cleanRest = parts.slice(2);
+  let facultyCode = null, batch = null, room = null;
+  if(cleanRest.length){
+    facultyCode = cleanRest[0] || null;
+    for(const p of cleanRest.slice(1)){
+      if(!p) continue;
+      if(p.startsWith("-")) batch = p.slice(1);
+      else room = p;
+    }
+  }
+  const subjectName = SUBJECTS[subjectCode] || subjectCode;
+  const facultyName = facultyCode ? (FACULTY[facultyCode] || facultyCode) : "-";
+  const roomLabel = room ? (ROOM_LABELS[room] || room) : "-";
+  return {type:"class", subjectCode, subjectName, facultyCode, facultyName, batch, room:roomLabel};
+}
+
+/* ===================== BUILD ROWS ===================== */
+function buildRows(day, cluster){
+  const periods = (TT_DATA.days[day] && TT_DATA.days[day][cluster]) || [];
+  const rows = [];
+  let i = 0;
+  while(i < periods.length){
+    let j = i;
+    while(j+1 < periods.length && periods[i].length && JSON.stringify(periods[j+1]) === JSON.stringify(periods[i])){
+      j++;
+    }
+    const start = TIME_LABELS[i].split("\n")[0];
+    const end = TIME_LABELS[j].split("\n")[1];
+    rows.push({ time: start + " - " + end, entries: periods[i] });
+    i = j+1;
+  }
+  return rows;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+}
+
+/* ===================== RENDER ===================== */
+function renderTable(day, cluster){
+  const rows = buildRows(day, cluster);
+  const list = document.getElementById("ttList");
+  list.innerHTML = "";
+
+  rows.forEach(row=>{
+    const wrap = document.createElement("div");
+
+    if(row.entries.length === 0){
+      wrap.className = "period free";
+      wrap.innerHTML = `<div class="ptime">${row.time}</div><div class="pbody">No lecture — free period</div>`;
+      list.appendChild(wrap);
+      return;
+    }
+
+    const first = parseEntry(row.entries[0]);
+    if(first.type === "lunch"){
+      wrap.className = "period special";
+      wrap.innerHTML = `<div class="ptime">${row.time}</div><div class="pbody">🍽️ Lunch Time</div>`;
+      list.appendChild(wrap);
+      return;
+    }
+    if(first.type === "library"){
+      wrap.className = "period special library";
+      wrap.innerHTML = `<div class="ptime">${row.time}</div><div class="pbody">📚 Library / LLC-1</div>`;
+      list.appendChild(wrap);
+      return;
+    }
+    if(first.type === "sports"){
+      wrap.className = "period special";
+      wrap.innerHTML = `<div class="ptime">${row.time}</div><div class="pbody">🏅 Sports</div>`;
+      list.appendChild(wrap);
+      return;
+    }
+
+    wrap.className = "period";
+    let bodyHtml = "";
+    row.entries.forEach(raw=>{
+      const e = parseEntry(raw);
+      const batchNum = e.batch ? e.batch.replace(/^[A-N]/,'') : "";
+      const batchTag = e.batch ? `<div class="batch-tag">Batch ${batchNum || e.batch}</div>` : "";
+      bodyHtml += `
+        <div class="class-row">
+          ${batchTag}
+          <div><span class="subject">${escapeHtml(e.subjectName)}</span><span class="subcode">${escapeHtml(e.subjectCode)}</span></div>
+          <div class="meta">
+            <span>👤 ${escapeHtml(e.facultyName)}</span>
+            <span>📍 ${escapeHtml(e.room)}</span>
+          </div>
+        </div>`;
+    });
+    wrap.innerHTML = `<div class="ptime">${row.time}</div><div class="pbody">${bodyHtml}</div>`;
+    list.appendChild(wrap);
+  });
+}
+
+/* ===================== UI WIRING ===================== */
+const branchSel = document.getElementById("branchSel");
+const clusterSel = document.getElementById("clusterSel");
+const dayRow = document.getElementById("dayRow");
+let selectedDay = "MONDAY";
+
+Object.keys(BRANCHES).forEach(code=>{
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = code + " — " + BRANCHES[code].name;
+  branchSel.appendChild(opt);
+});
+
+function refreshClusters(){
+  const b = BRANCHES[branchSel.value];
+  clusterSel.innerHTML = "";
+  const keys = Object.keys(b.clusters);
+  keys.forEach(k=>{
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = b.clusters[k];
+    clusterSel.appendChild(opt);
+  });
+  clusterSel.disabled = keys.length <= 1;
+}
+branchSel.addEventListener("change", refreshClusters);
+refreshClusters();
+
+DAYS.forEach(d=>{
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "day-btn" + (d===selectedDay ? " active" : "");
+  btn.textContent = DAY_LABELS[d];
+  btn.addEventListener("click", ()=>{
+    selectedDay = d;
+    document.querySelectorAll(".day-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+  dayRow.appendChild(btn);
+});
+
+document.getElementById("submitBtn").addEventListener("click", ()=>{
+  const cluster = clusterSel.value;
+  const clusterLabel = BRANCHES[branchSel.value].clusters[cluster];
+  renderTable(selectedDay, cluster);
+  document.getElementById("resTitle").textContent = clusterLabel;
+  document.getElementById("resTag").textContent = DAY_LABELS[selectedDay].toUpperCase() + " · " + cluster;
+  const result = document.getElementById("result");
+  result.classList.add("show");
+  document.getElementById("hintText").style.display = "none";
+  result.scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+/* ===================== POPUP: slide in from right after 5s ===================== */
+window.addEventListener("load", ()=>{
+  setTimeout(()=>{
+    const p = document.getElementById("joinPopup");
+    p.classList.remove("hidden");
+    requestAnimationFrame(()=> p.classList.add("show"));
+  }, 5000);
+});
+document.getElementById("popupClose").addEventListener("click", ()=>{
+  const p = document.getElementById("joinPopup");
+  p.classList.remove("show");
+  setTimeout(()=> p.classList.add("hidden"), 400);
+});
+</script>
+</body>
+</html>
